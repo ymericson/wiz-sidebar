@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 import calendar
 import tabulate
 import urllib.request, json 
 from datetime import datetime
+from tabulate import tabulate
 from nba_api.stats.endpoints import leagueleaders, leaguestandings
 from nba_api.stats.static import players
 
@@ -12,9 +14,10 @@ def perGame():
     was, stats = df[df.TEAM == 'WAS'], ['PTS', 'REB', 'AST', 'STL']
     wash_per = was[stats].div(was['GP'], axis=0).round(1)
     wash_per = pd.concat([was['PLAYER'], wash_per], axis=1)
-    wash_per.PLAYER = wash_per.PLAYER.str.split(n=1).str[1]
+    # wash_per.PLAYER = wash_per.PLAYER.str.split(n=1).str[1]
     wash_per = wash_per.set_index('PLAYER')
-    return wash_per.to_markdown(floatfmt=".1f")
+    return tabulate(wash_per, tablefmt='pipe', headers='keys',
+        colalign=("left","center","center","center","center"), floatfmt=".1f")
 
 perGame = perGame()
 
@@ -61,6 +64,8 @@ def schedule():
     # reformat date and time
     df.Date = df.Date.dt.strftime('%b %d')
     # df.Time = df.Time.str.slice(stop=-3)
+    # add logo
+    df.Team = df.Team + ' [](/' + df.Team.str[-3:] + ')' 
     return df.set_index('Date').to_markdown()
 
 schedule = schedule()
@@ -69,12 +74,23 @@ schedule = schedule()
 def standings():
     sta = leaguestandings.LeagueStandings() 
     df = sta.standings.get_data_frame()
-    df = df[df.Conference == 'East'][['TeamCity', 'WINS', 'LOSSES', 'WinPCT', 'L10']]
+    df = df[df.Conference == 'East'][['TeamCity', 'WINS', 'LOSSES', 'WinPCT', 'L10']] # L10 removed
     df.columns = ['Team', 'W', 'L', 'PCT', 'L10']
     df.PCT = df.PCT.round(2)
     df = df.set_index('Team').reset_index()
     df.index.name = '#'
-    return df.to_markdown()
+    df.index = range(1,len(df)+1)
+
+    # games behind col
+    df['W-L'] = df.W.astype(str) + ' - ' + df.L.astype(str) 
+    df['WLDiff'] = df['W'] - df['L']
+    df['GB'] = 0
+    pos = df.columns.get_loc('WLDiff')
+    df['GB'] =  (df.iat[0, pos] - df.iloc[1:, pos]) / 2
+
+    df = df[['Team', 'W-L', 'GB', 'L10']].replace(np.nan, 0, regex=True)
+    return tabulate(df, tablefmt='pipe', headers='keys',
+        colalign=("center", "left", "center", "center", "center"))
 
 standings = standings()
 
