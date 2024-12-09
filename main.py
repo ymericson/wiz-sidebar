@@ -1,6 +1,5 @@
-import praw, config, requests
+import praw, config
 from nba_data import perGame, schedule, standings
-import tabulate
 
 print(schedule, "\n", standings, "\n", perGame )
 
@@ -18,8 +17,8 @@ def editSidebar():
 
     sidebar = subreddit.wiki["config/sidebar"]
     sidebar.edit(content = 
-    
-"""    
+                 
+"""
 *****
 
 [/r/WashingtonWizards Chat on Discord](https://discord.gg/bZMNwXB)
@@ -30,7 +29,7 @@ def editSidebar():
 
 [Facebook page](http://www.facebook.com/Wizards)
 
-[Twitter \(@WashWizards\)](http://twitter.com/washwizards)
+[Twitter \\(@WashWizards\\)](http://twitter.com/washwizards)
 
 *****
 [Wizards Schedule](http://www.nba.com/wizards/schedule)
@@ -38,6 +37,7 @@ def editSidebar():
 """ 
 
 + "\n\n\n" + schedule + "\n\n\n" + standings + "\n\n\n" +  perGame + "\n\n\n" +  
+# + "\n\n\n" + schedule + "\n\n\n" + standings + "\n\n\n" + 
 
 
 """
@@ -69,16 +69,10 @@ def editSidebar():
 * /r/caps 
 * /r/DCUnited 
 * /r/DCDefenders
-
-#### [Hot](/r/washingtonwizards/)   \   [New](https://www.reddit.com/r/washingtonwizards/new/)   \   [Top](/r/washingtonwizards/top/)
                            
 """                     
     )
                            
 
-
 if __name__ == "__main__":
     editSidebar()
-
-# https://praw.readthedocs.io/en/latest/code_overview/other/subredditmoderation.html?highlight=sidebar#praw.models.reddit.subreddit.SubredditModeration.update
-# https://github.com/praw-dev/praw
